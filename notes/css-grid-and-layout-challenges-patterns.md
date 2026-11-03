@@ -90,3 +90,49 @@ Deliberate practice log: one entry per challenge. Each pattern has a cue (when t
 - [ ] Why does `1fr` in `grid-template-rows` do nothing when the container has no height?
 - [ ] In what order does the grid place items, and why does an item with only `span` sometimes leave a hole?
 - [ ] What's the difference between `grid-column: 4`, `grid-column: span 2` and `grid-column: 3 / span 2`?
+
+---
+
+## C3 — Page layout
+
+**Gap labels during the challenge:** missing tool (sticky footer) + detail (column widths) → detail (rows, height) → missing tool (`minmax()` outside track sizing).
+
+### 1. Areas describe placement, columns describe size
+
+- **Cue:** "main should be wider than the sidebars."
+- **My mistake:** I made main wider by repeating its name: `"sidebar main main aside"`, with no `grid-template-columns`. The implicit columns are `auto`, so their widths came from content. Main was wide only because it had the most text. A long link in the sidebar would have changed the proportions.
+- **Mental model:** the areas string is a **map** (what goes where). Track sizes are a **separate decision** in `grid-template-columns` / `grid-template-rows`. One column per real column of the layout (`1fr 2fr 1fr`), not one per "unit of width."
+- **Payoff:** swapping the sidebar to the right is a one-word change in the string (`"aside main sidebar"`). Proportions stay because the sizes live on the tracks, not in the map.
+- **Drill:** write any areas layout, then delete `grid-template-columns` and watch the widths follow the content. Put a long word into the narrowest area.
+
+### 2. Sticky footer: `min-height` on the container + `auto 1fr auto` rows
+
+- **Cue:** "footer at the bottom of the screen, even with little content."
+- **My mistakes:**
+  1. No container height, so there was no free space for `1fr` (same as C2 #1).
+  2. `grid-template-rows: 1fr 1fr auto`: the header got as much free space as the content row, which is about half the screen when the window is tall.
+  3. `height: 100vh`: long content overflows the container, and the footer stays in the middle of the text.
+- **Mental model:**
+  - `min-height: 100vh` means "at least the screen, more if the content needs it." It creates free space without capping the height.
+  - Only **one** row gets `1fr` (the one that should absorb the free space). Rows that should be as tall as their content get `auto`.
+  - Reset `body { margin: 0 }`, or `100vh` + 16px of default margin gives a scrollbar on an empty page.
+- **Drill:** test with 1 paragraph (footer at the bottom, no scrollbar) and with 20 paragraphs (footer after the content, page scrolls).
+
+### 3. `minmax()` only works in track sizing
+
+- **Cue:** I want "at least X, but grow."
+- **My mistake:** `height: minmax(100vh, auto)`. That value is invalid, so the browser dropped the whole declaration. The bug was silent: DevTools showed it struck through with a ⚠.
+- **Mental model:** `minmax()` is valid only in `grid-template-rows/columns` and `grid-auto-rows/columns`. On a regular box, a floor is `min-height` / `min-width`, and a ceiling is `max-*`.
+- **Drill:** when a property "doesn't work," look in the Styles panel first. A struck-through line with a warning icon means invalid syntax, not a cascade problem.
+
+### 4. Edge cases to remember
+
+- **Long URL in a `1fr` column:** same `minmax(auto, 1fr)` trap as C1 #5. Use `minmax(0, 1fr)` or `overflow-wrap: anywhere`.
+- **Narrow screen:** three columns at 400px make the sidebar and aside unreadable. Fixed in C4 with a media query and a different areas string.
+- **`100vh` on mobile:** the address bar changes the viewport height. Use `100dvh`.
+
+### Self-check before the next challenge
+
+- [ ] Why shouldn't width proportions come from repeating a name in the areas string?
+- [ ] Which three things make a sticky footer, and why `min-height` instead of `height`?
+- [ ] Where is `minmax()` valid, and how do I spot an invalid declaration in DevTools?

@@ -1,0 +1,39 @@
+html {
+  font-family: sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  display: grid;
+  gap: 1rem;
+  min-height: 100vh;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+}
+
+.page-header {
+  grid-area: header;
+}
+
+.page-sidebar {
+  grid-area: sidebar;
+}
+
+.page-main {
+  grid-area: main;
+}
+
+.page-aside {
+  grid-area: aside;
+}
+
+.page-footer {
+  grid-area: footer;
+}
