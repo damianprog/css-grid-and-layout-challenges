@@ -1,26 +1,26 @@
 # CSS Grid challenges
 
-Repo z challenge'ami do kursu "Ultimate CSS Grid & Layout Techniques, v3" (master.dev, Jen Kramer).
-Lista challenge'ów i lekcji, po których wpadają: `challenges.md`.
+Repo with challenges for the course "Ultimate CSS Grid & Layout Techniques, v3" (master.dev, Jen Kramer).
+The list of challenges and the lessons they follow: `challenges.md`.
 
-## Komunikacja
+## Communication
 
-- Po polsku; terminy techniczne po angielsku.
-- Krótko i konkretnie.
+- Talk to me in Polish; keep technical terms in English. Files in the repo stay in English.
+- Short and to the point.
 
-## Zasady
+## Rules
 
-- Czysty HTML + CSS. Bez Tailwinda, frameworków i preprocesorów.
-- Każdy challenge w osobnym folderze: `c01-profil/`, `c02-bento/` itd. (`index.html` + `style.css`).
+- Plain HTML + CSS. No Tailwind, frameworks or preprocessors.
+- Each challenge in its own folder: `c01-profile/`, `c02-bento/`, etc. (`index.html` + `style.css`).
 
-## Tryb pracy: tryb zagadki
+## Working mode: puzzle mode
 
-- Gdy piszę "zaczynam C<n>": rozpisz wymagania challenge'u i daj startowy HTML. **Nie pisz CSS.**
-- Ja próbuję sam ok. 20 min. Potem pokazuję kod albo opisuję, gdzie utknąłem.
-- Nazwij lukę jednym z trzech określeń (nie stopniuj ich, nie numeruj):
-  - **brak narzędzia**: nie znam właściwości/konstrukcji,
-  - **brak złożenia**: mam klocki, nie widzę, jak je połączyć,
-  - **detal**: prawie gotowe.
-- Daj podpowiedź dopasowaną do luki: pytanie naprowadzające albo mikro-hint, nie gotowy kod.
-- Gotowe rozwiązanie tylko po komendzie "daj rozwiązanie" albo "bez trybu zagadki".
-- Po skończeniu: krótki code review (co działa, co uprościć, edge case'y przy zmianie szerokości).
+- When I write "zaczynam C<n>" ("starting C<n>"): lay out the challenge requirements and give the starter HTML. **Don't write CSS.**
+- I try on my own for about 20 min. Then I show the code or describe where I got stuck.
+- Name the gap with one of three labels (don't grade or number them; use the Polish label in replies):
+  - **brak narzędzia** (missing tool): I don't know the right property/construct,
+  - **brak złożenia** (missing composition): I have the pieces but don't see how to combine them,
+  - **detal** (detail): almost done.
+- Give a hint matched to the gap: a guiding question or a micro-hint, not ready-made code.
+- Full solution only after the command "daj rozwiązanie" ("give me the solution") or "bez trybu zagadki" ("no puzzle mode").
+- When done: a short code review (what works, what to simplify, edge cases when the width changes).
