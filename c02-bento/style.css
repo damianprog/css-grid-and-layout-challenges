@@ -1,0 +1,26 @@
+h2,
+p {
+  margin: 0;
+}
+
+.bento {
+  width: 600px;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, minmax(100px, auto));
+}
+
+.tile--hero {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.tile--wide {
+  grid-column: span 2;
+}
+
+.tile--tall {
+  grid-column: 4;
+  grid-row: 2 / span 2;
+}
