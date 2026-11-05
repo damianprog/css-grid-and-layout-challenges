@@ -1,0 +1,56 @@
+/* extremely basic formatting */
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+body {
+  font-family: "Libre Franklin", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h2 {
+  margin: 0;
+}
+
+/* Solution */
+
+.dashboard {
+  display: grid;
+  gap: 1rem;
+}
+
+.tile {
+  border: 2px solid red;
+  padding: 1rem;
+}
+
+@media (min-width: 600px) {
+  .dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tile-featured {
+    grid-column: 1/3;
+  }
+}
+
+@media (min-width: 1000px) {
+  .dashboard {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, auto);
+  }
+
+  .tile-featured {
+    grid-column: 1/4;
+    grid-row: 2/3;
+  }
+
+  .tile-activity {
+    grid-row: 1/3;
+  }
+}
