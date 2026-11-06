@@ -136,3 +136,117 @@ Deliberate practice log: one entry per challenge. Each pattern has a cue (when t
 - [ ] Why shouldn't width proportions come from repeating a name in the areas string?
 - [ ] Which three things make a sticky footer, and why `min-height` instead of `height`?
 - [ ] Where is `minmax()` valid, and how do I spot an invalid declaration in DevTools?
+
+---
+
+## C4 — Responsive dashboard
+
+**Gap labels during the challenge:** none. It met the requirements on the first attempt, with no hints. The notes below come from the code review, which was based on the code only, without running it in a browser.
+
+### 1. Mobile-first: base styles are the narrow layout
+
+- **Cue:** "1 column → 2 columns → 4 columns."
+- **What worked:** the base rule is only `display: grid` and `gap`, which already gives 1 column. Each wider view is added with `min-width`, and the HTML order doesn't change.
+- **Mental model:** a media query adds only what differs from the narrower view, and `min-width` rules build on each other. That's why the 1000px query must also reset what the 600px one set for `.tile-featured`.
+
+### 2. A row-locked item lets auto-placement find its column
+
+- **Cue:** "this tile must span these rows, but its column follows from the others."
+- **What worked:** from 1000px `.tile-activity` has only `grid-row: 1/3` and still lands in column 4, and the remaining tiles fill row 1 by themselves.
+- **Mental model:** this extends C2 #2. Fully placed items go first (`.tile-featured` takes columns 1–3 of row 2), then items locked to a row, then everything else. Activity needs both rows free, so column 4 is the first one that fits.
+- **Drill:** remove `grid-row` from `.tile-featured` and predict where each tile lands before looking.
+
+### 3. Don't write what the grid already does
+
+- **`grid-template-rows: repeat(2, auto)`:** can be removed. Implicit rows are already `auto`, and `grid-row` creates them.
+- **`grid-column: 1/3`:** tied to the number of columns. `1 / -1` always means the full width of the explicit grid.
+- **Status:** not applied yet.
+
+### 4. Edge cases to remember
+
+- **Focus order:** from 1000px, Tab goes to "Full report" in the bottom row first, then up to the three "Details" links, and "All activity" last. Focus and screen readers follow the HTML, not the visual order. It's minor here, but a real accessibility problem with bigger rearrangements.
+- **Position-dependent layout:** it works only with exactly 5 tiles. A sixth one without a position lands in the next row and takes one column.
+
+### 5. Open exercise: `grid-template-areas`
+
+The challenge plan mentions "area order," and I used line numbers, which also meets the requirements. Rewrite it with areas: can most of the changes between breakpoints move into a single rule?
+
+### Self-check before the next challenge
+
+- [ ] Why does mobile-first need no rule for the 1-column layout?
+- [ ] In what order does the grid place fully placed, row-locked and remaining items?
+- [ ] Why can the visual order and the Tab order differ, and what does that cost?
+
+---
+
+## C5 — Hero banner
+
+**Gap labels during the challenge:** missing tool (gradient) → missing tool (image fill) → missing composition (card track, needed a step-by-step walkthrough) → detail (padding past `overflow: hidden`, `transition`) → missing composition (text reflowing during the animation) → detail (`align-self`) → missing tool (image inflating the hero).
+
+### 1. Layers are items in the same grid area
+
+- **Cue:** "text over an image," and the usual reflex is `position: absolute`.
+- **What worked:** image, gradient, text and card all sit on the same grid lines. Later HTML paints on top, so the order of the layers comes from the markup.
+- **Mental model:** grid items are allowed to share cells. Unlike absolute positioning, every layer stays in the layout, so the content can still give the container its height.
+- **Gradient:** it's a generated image, so it goes in `background-image: linear-gradient(direction, start, end)`. Use `rgb(0 0 0 / 0.7)` and `transparent` so the photo shows through, with the dark end under the text.
+
+### 2. An image doesn't stretch to its grid area
+
+- **Cue:** a gray strip under the image, while the gradient `div` fills the whole area.
+- **My mistake:** I expected the image to fill the area like the `div` does. It kept its 16:9 height, so it was shorter than `70vh`.
+- **Mental model:** `stretch` is the default for a `div`, but an element with its own aspect ratio keeps its size. It needs an explicit `width` and `height`, and `object-fit: cover` crops the excess instead of distorting the image.
+- **Drill:** in DevTools, switch `object-fit` between `fill`, `contain` and `cover`, and describe what each one does.
+
+### 3. Image inside `min-height`: `height: 0; min-height: 100%`
+
+- **Cue:** the hero is the right height in a normal window but much taller than `70vh` in a wide one.
+- **My mistake:** after changing `height` to `min-height` on the hero, `height: 100%` on the image stopped limiting it. The rows grew to the image's proportional height (about 1080px at 1920px wide).
+- **Mental model:** with `min-height` the rows are sized from content, and a percentage height has nothing to resolve against yet, so the image contributes its natural height. With `height: 0; min-height: 100%` it contributes nothing to the rows, then fills the area once the area has a size.
+- **Trade-off:** `height` caps the hero and clips content in a short window. `min-height` lets it grow, so the image must not be the thing that grows it.
+- **Drill:** test at a very wide window (hero is exactly `70vh`) and at about 250px tall (hero grows with the text and nothing is clipped).
+
+### 4. Reveal by animating a track, not by toggling the element
+
+- **Cue:** "a panel slides in from the edge," without `transform` or `position`.
+- **My mistakes:**
+  1. `display: none` on the card. It removes the element from the layout, so there is nothing to animate.
+  2. `grid-column: 3/-1` with 2 columns. Line `-1` was also line 3, so the browser dropped the end line and created an implicit third column outside the image.
+  3. I pictured the hero moving aside to uncover the card, because I thought of the hero's size rather than how its tracks divide it.
+- **Mental model:** the container stays the same size and only the division changes: `1fr 0` → `1fr 20rem`. Layers spanning all tracks don't move, and only the line between the tracks does. `transition` goes on the base rule, not on `:hover`, so it also animates on the way out. Both states need the same number of tracks and compatible units: `0` → `20rem` or `0fr` → `1fr`, but not `0` → `1fr`.
+- **Drill:** build it in stages: static card in its track, then hidden, then a jump on hover, and only then `transition`.
+
+### 5. Whatever depends on a changing track reflows with it
+
+- **Cue:** text squeezing and rewrapping during an animation.
+- **My mistakes:**
+  1. `.hero-text` sat in column 1, which narrows when the card comes in.
+  2. The card took its width from its track, so its text rewrapped at every frame.
+  3. `overflow: hidden` on the card still left its padding visible at track width 0.
+- **Mental model:**
+  - Anything that should stay still spans **all** tracks, so its area never changes. That's why the text uses `1/3`, like the image.
+  - A sliding element has a fixed width equal to the open track (`width: 20rem`). It overflows the empty track, and `overflow: hidden` on the **container** clips it, so it emerges from behind the edge instead of stretching.
+  - With `border-box` an element can't get narrower than its padding, and `overflow: hidden` clips at the padding box. Clip on the parent when the padding must go too.
+
+### 6. `align-self` needs room to move
+
+- **Cue:** "I added `align-self: end` and nothing changed."
+- **My mistake:** `.hero-text` also had `height: 100%`, so the box already filled its area and its bottom edge was already at the bottom.
+- **Mental model:** alignment moves the **item's box** inside its area, not the content inside the box. `justify-self` is horizontal and `align-self` is vertical. If the DevTools highlight fills the whole area, alignment can't do anything.
+
+### 7. Small defaults worth remembering
+
+- **`width: 100vw`:** not needed on a block-level grid container, which already fills its parent. `100vw` includes the scrollbar, so it causes horizontal scroll once the page is taller than the window.
+- **`a { color: inherit; }`:** links don't inherit color by default because the browser styles them. One rule makes every link follow its context.
+
+### 8. Edge cases to remember
+
+- **Rows:** `repeat(2, 1fr)` isn't needed. One row plus `align-self: end` gives the same result, and taller text no longer enlarges an unused row above it. Not applied yet.
+- **Below 320px:** the `20rem` card gets clipped. At 360px it fits but covers most of the hero, which I accepted because it goes away on mouse-out.
+- **Touch and keyboard:** there's no real hover on touch, and the link in the hidden card can still receive keyboard focus while invisible. `:focus-within` is the lead to follow.
+
+### Self-check before the next challenge
+
+- [ ] Why does a `div` fill its grid area while an `img` doesn't, and what do I add to the `img`?
+- [ ] Why does `display: none` rule out a slide, and what should change instead?
+- [ ] What should I check when a layer moves or rewraps during a track animation?
+- [ ] Why does `align-self` do nothing on an item with `height: 100%`?
