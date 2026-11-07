@@ -250,3 +250,52 @@ The challenge plan mentions "area order," and I used line numbers, which also me
 - [ ] Why does `display: none` rule out a slide, and what should change instead?
 - [ ] What should I check when a layer moves or rewraps during a track animation?
 - [ ] Why does `align-self` do nothing on an item with `height: 100%`?
+
+---
+
+## C6 — Gallery without media queries
+
+**Gap labels during the challenge:** detail (measurements right, no "why") → missing tool (reading collapsed tracks in DevTools) → missing composition (why the variants stop differing, needed a fill-in-the-blank) → detail (what counts as an empty column) → missing composition (the "columns can grow" condition, needed the answer).
+
+### 1. `auto-fit` and `auto-fill` create the same tracks
+
+- **Cue:** "the number of columns adjusts by itself," using `repeat(auto-fit | auto-fill, minmax(180px, 1fr))`.
+- **My mistake:** in `fit, 2 items` at 1200px I counted 2 columns, because that's what the page showed. I also had cause and effect reversed: I thought the empty columns got 0px because the tiles took the whole width.
+- **Mental model:** both keywords create as many tracks as fit at the minimum size (1200 / 180 → 6). The only difference is what happens to **empty** tracks. `auto-fill` keeps them, and `auto-fit` collapses them to 0. Only after that is `1fr` resolved: in `fit` the 2 remaining tracks share 1200px (600px each), and in `fill` all 6 share it (200px each).
+- **One sentence:** `auto-fit` collapses empty columns and `auto-fill` keeps them, which shows only when there are empty columns and the columns can grow (e.g. `1fr`).
+
+### 2. The difference needs empty tracks AND a flexible max
+
+- **Cue:** "auto-fit and auto-fill look the same, so is there a difference at all?"
+- **Mental model:** if either condition is missing, the two variants look identical.
+  - **No empty tracks:** `fit` has nothing to collapse. With 2 items that happens below `3 × 180 = 540px`, and with 10 items at 1200px there are 6 tracks and all of them are used.
+  - **Fixed max** (`minmax(180px, 180px)`): `fit` still collapses the empty tracks (DevTools shows it), but no tile can grow into the freed space, so both pages have the same empty strip on the right.
+- **Thresholds:** the variants differ once `fill` fits more tracks than there are items: N items differ from `(N + 1) × min` up. For 10 items that's 1980px without `gap`. With `gap` add `N × gap`.
+
+### 3. An empty column is empty in every row
+
+- **Cue:** 10 tiles in 6 columns leave 2 empty cells in the last row, so why doesn't `fit` collapse them?
+- **Mental model:** collapsing works on whole tracks. A column is empty only when **no row** has an item in it. Gaps at the end of the last row don't count.
+
+### 4. Reading the real tracks in DevTools
+
+- **Cue:** the overlay shows fewer columns than I expect, or line numbers piled on one edge.
+- **Mental model:** collapsed tracks have 0 width, so their lines sit in the same place and the numbers overlap (at the right edge I saw `-1`, `7`, `-1`). The last line number tells you the real number of tracks: line 7 means 6 columns.
+- **Drill:** select the grid, open **Computed** → `grid-template-columns`. `600px 600px 0px 0px 0px 0px` vs `200px × 6` settles any doubt.
+
+### 5. Choosing between them
+
+- **`auto-fit`:** a gallery with 2 or 20 photos, where a few items should stretch across the whole row.
+- **`auto-fill`:** tiles should keep a consistent size whatever the count, e.g. a product grid where one product shouldn't become 1200px wide, or a list that grows dynamically without resizing existing items.
+
+### 6. Edge cases to remember
+
+- **No `gap`:** tiles of the same color merge into one strip, so tile boundaries aren't visible. Adding `gap` shifts every threshold (3 columns need `3 × 180 + 2 × gap`). Not applied yet.
+- **Container narrower than the minimum:** below 180px the tile can't shrink and the page scrolls horizontally. `minmax(min(180px, 100%), 1fr)` fixes it. Not tested yet: compare both at 160px.
+
+### Self-check before the next challenge
+
+- [ ] How many tracks do `auto-fit` and `auto-fill` create at 1200px with `minmax(180px, 1fr)`, and what differs between them?
+- [ ] Which two conditions must hold for the difference to be visible?
+- [ ] From what width do 10 items in `minmax(180px, 1fr)` differ between the variants, without and with `gap: 16px`?
+- [ ] Where in DevTools do I check whether tracks are collapsed?

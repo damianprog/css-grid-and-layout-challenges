@@ -1,0 +1,40 @@
+/* extremely basic formatting */
+
+h2,
+p {
+  margin: 0;
+}
+
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+body {
+  font-family: "Libre Franklin", sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+}
+
+/* Solution */
+
+.gallery {
+  display: grid;
+}
+
+.fit {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.fill {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.tile {
+  background-color: blueviolet;
+  color: white;
+}
