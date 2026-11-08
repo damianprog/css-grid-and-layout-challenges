@@ -299,3 +299,56 @@ The challenge plan mentions "area order," and I used line numbers, which also me
 - [ ] Which two conditions must hold for the difference to be visible?
 - [ ] From what width do 10 items in `minmax(180px, 1fr)` differ between the variants, without and with `gap: 16px`?
 - [ ] Where in DevTools do I check whether tracks are collapsed?
+
+---
+
+## C7 — Pricing table
+
+**Gap labels during the challenge:** missing tool (where to start, needed steps) → detail (implicit rows stretching) → detail (`grid-row` vs `grid-template-rows`) → missing tool (`lh`) → subgrid on the first attempt from three guiding questions.
+
+### 1. Implicit rows share the free space equally
+
+- **Cue:** "buttons at the bottom of every card," with the card as a grid and no `grid-template-rows`.
+- **My mistake:** `align-self: end` on the button. In the shorter card the free space was spread over all 4 implicit rows, so the button sat at the bottom of its own stretched row, not at the bottom of the card.
+- **Mental model:** with `align-content: normal` the implicit `auto` rows of a stretched grid all grow. Decide which **one** row absorbs the free space: `auto auto 1fr auto`. Then `align-self` isn't needed.
+- **Drill:** turn on the overlay on the shortest card and check that only the list row is taller than its content.
+
+### 2. Placement on the item, sizing on the container
+
+- **Cue:** "this row should take the rest."
+- **My mistake:** I reached for `grid-row` on `.plan-features`.
+- **Mental model:** `grid-row` / `grid-column` on an item say **where** it goes. Track **sizes** are decided only by the container: `grid-template-rows` / `grid-template-columns`.
+
+### 3. Without subgrid each card guesses: `min-height: 2lh`
+
+- **Cue:** headings of different lengths push the prices out of line across cards.
+- **Mental model:** every card is a separate grid, so its rows don't know about the other cards. The best you can do is reserve the worst case. `lh` = one line of the element's own text (`font-size × line-height`), so it goes on `.plan-name`, not on `.plan`, where it would use the smaller card font.
+- **Limit:** once the window narrows and the Pro name wraps to 3 lines, the prices drift apart again. Any fixed value is a guess.
+
+### 4. Subgrid: the parent owns the rows, the cards borrow them
+
+- **Cue:** "the same parts must line up across sibling components," whatever the content length.
+- **What worked:**
+  1. The parent `.pricing` defines the rows: `grid-template-rows: auto auto 1fr auto`.
+  2. Each card spans them all: `grid-row: span 4`.
+  3. The card stays a grid but uses the parent's tracks: `grid-template-rows: subgrid`.
+- **Mental model:** a shared row is as tall as the tallest piece in it across **all** cards. That's why one long name moves every price down together, and why `min-height: 2lh` became unnecessary (removed).
+- **Gap:** the subgrid inherits the parent's `gap` on the shared axis. That's where the space inside the card came from. Override it with `row-gap` on the card.
+
+### 5. Highlighting one card without breaking the rows
+
+- **Safe:** `background`, `color`, `box-shadow`, `outline`, `scale` / `transform`. They don't change the box size the grid sees. Applied: `background` + `scale: 1.05`.
+- **Affects everyone:** `padding`, `border`, `font-size` on the featured card make the shared rows taller, so all cards grow with it. It stays aligned, but it's not "just Pro."
+
+### 6. Edge cases to remember
+
+- **Narrow screen:** 3 columns stay at 320px. With a 1-column breakpoint only the first card uses the explicit rows. The next ones land in implicit `auto` rows, so their list row is no longer `1fr`. That's fine when the cards are stacked. Not applied yet.
+- **`1fr` with no container height:** the list row equals the longest list (C2 #1). It only matters if `.pricing` gets a fixed height.
+- **`repeat(3, 1fr)`:** same `minmax(auto, 1fr)` trap as C1 #5 if a long word lands in a plan name.
+
+### Self-check before the next challenge
+
+- [ ] Why does `align-self: end` alone not put the button at the bottom of a grid card?
+- [ ] Which three declarations make subgrid rows, and on which elements do they go?
+- [ ] Why does `2lh` go on the heading and not on the card?
+- [ ] Which ways of highlighting a card keep the shared rows unchanged?
